@@ -73,7 +73,7 @@ def render():
             with col5:
                 if project_type == "卖方":
                     phase = st.selectbox("交易需求 *", [
-                        "出售股权", "被并购", "可参可控", "战略合作", "融资"
+                        "出售股权", "出让控制权", "被并购", "可参可控", "战略合作", "融资"
                     ])
                 else:
                     phase = st.selectbox("交易需求 *", [
@@ -236,7 +236,7 @@ def render():
                     with col4:
                         region = st.selectbox("地区 *", regions, index=region_idx)
 
-                    phases_seller = ["出售股权", "被并购", "可参可控", "战略合作", "融资"]
+                    phases_seller = ["出售股权", "出让控制权", "被并购", "可参可控", "战略合作", "融资"]
                     phases_buyer = ["收购", "可参可控"]
                     phases = phases_seller if project_type_edit == "卖方" else phases_buyer
                     current_phase = project.get("phase", "出售股权")
