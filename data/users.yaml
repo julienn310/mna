@@ -1,0 +1,10 @@
+admin:
+  created_at: '2026-06-26 11:37:40'
+  name: 管理员
+  password: $2b$12$VQy6V3IYSLRjyzouSQrvf.cjOWQNOxP/S4t4FcP4ZoccT/qvvbSf6
+  role: admin
+yt:
+  created_at: '2026-06-26 12:18:51'
+  name: yt
+  password: $2b$12$VSIus7szKa15BtOvZDRqIuDzK/fUQsnZBv3B0/DInFykb.J8MysUm
+  role: user
