@@ -30,18 +30,6 @@ def render():
     if "editing_project_id" not in st.session_state:
         st.session_state.editing_project_id = None
 
-    st.markdown("""
-    <style>
-        .admin-section {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 16px;
-            border: 1px solid #e2e8f0;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
     st.title("🔧 管理员后台")
     st.markdown("---")
 
@@ -131,6 +119,7 @@ def render():
 【合作方向】买方顾问方向"""
                 )
 
+                # 买方字段留空
                 buyer_requirements = ""
                 buyer_profile = ""
                 buyer_budget = ""
@@ -170,6 +159,7 @@ def render():
                 with col8:
                     buyer_synergy = st.text_input("协同资源", placeholder="产业链上下游、销售渠道等")
 
+                # 卖方字段留空
                 company_intro = ""
                 financial = ""
                 valuation = ""
