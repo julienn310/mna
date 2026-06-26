@@ -5,15 +5,43 @@
 
 import streamlit as st
 import pandas as pd
-from modules.data_manager import load_projects, get_filter_options
 import sys
 from pathlib import Path
 
-# 添加父目录到路径
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from modules.data_manager import load_projects, get_filter_options
 
 def render():
     """渲染项目列表页"""
+
+    st.markdown("""
+    <style>
+        .project-card {
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(15, 36, 57, 0.05);
+            border-left: 4px solid #14919b;
+        }
+        .project-card:hover {
+            box-shadow: 0 4px 16px rgba(15, 36, 57, 0.1);
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-seller { background: #1e3a5f; color: white; }
+        .badge-buyer { background: #0d7377; color: white; }
+        .badge-onsale { background: #ecfdf5; color: #0d7377; border: 1px solid #0d7377; }
+        .badge-sold { background: #fef2f2; color: #dc2626; border: 1px solid #dc2626; }
+    </style>
+    """, unsafe_allow_html=True)
 
     st.title("📋 并购重组项目列表")
     st.markdown("---")
@@ -24,6 +52,12 @@ def render():
     # 侧边筛选器
     with st.sidebar:
         st.markdown("### 🔍 筛选条件")
+
+        # 项目类型
+        project_type = st.selectbox(
+            "项目类型",
+            ["全部", "卖方", "买方"]
+        )
 
         # 行业
         industry = st.selectbox(
@@ -39,12 +73,13 @@ def render():
 
         # 交易阶段
         phase = st.selectbox(
-            "交易阶段",
+            "交易需求",
             ["全部"] + filters.get("phases", [])
         )
 
-        # 应用筛选
+        # 重置筛选
         if st.button("🔄 重置筛选", use_container_width=True):
+            project_type = "全部"
             industry = "全部"
             region = "全部"
             phase = "全部"
@@ -53,6 +88,8 @@ def render():
     df = load_projects()
 
     # 应用筛选
+    if project_type != "全部":
+        df = df[df["project_type"] == project_type]
     if industry != "全部":
         df = df[df["industry"] == industry]
     if region != "全部":
@@ -60,7 +97,7 @@ def render():
     if phase != "全部":
         df = df[df["phase"] == phase]
 
-    # 过滤只在售项目
+    # 过滤在售项目
     df = df[df["status"] == "在售"]
 
     # 显示统计
@@ -80,39 +117,31 @@ def render():
         st.info("暂无符合条件的项目")
         return
 
-    # 表格展示 + 详情预览
     st.markdown("### 项目概览")
 
-    # 简化显示字段
-    display_cols = ["id", "name", "industry", "region", "phase", "highlights"]
-
     for idx, row in df.iterrows():
+        is_seller = row.get("project_type", "卖方") == "卖方"
+        type_badge = '<span class="badge badge-seller">📤 卖方</span>' if is_seller else '<span class="badge badge-buyer">📥 买方</span>'
+        status_badge = '<span class="badge badge-onsale">🟢 在售</span>' if row.get("status") == "在售" else '<span class="badge badge-sold">🔴 已下架</span>'
+
         with st.container():
-            col1, col2, col3 = st.columns([3, 1, 1])
+            col1, col2 = st.columns([4, 1])
 
             with col1:
                 st.markdown(f"""
-                <div style="
-                    padding: 16px;
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    border-radius: 12px;
-                    margin-bottom: 12px;
-                    border-left: 4px solid #4263eb;
-                ">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                        <span style="
-                            background: #4263eb;
-                            color: white;
-                            padding: 2px 8px;
-                            border-radius: 4px;
-                            font-size: 12px;
-                        ">{row.get('id', 'N/A')}</span>
-                        <strong style="font-size: 16px; color: #1a1a2e;">{row.get('name', 'N/A')}</strong>
+                <div class="project-card">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        {type_badge}
+                        {status_badge}
+                        <span style="background: #f1f5f9; color: #64748b; padding: 3px 10px; border-radius: 4px; font-size: 12px;">
+                            {row.get('id', 'N/A')}
+                        </span>
                     </div>
-                    <div style="color: #666; font-size: 14px; margin-bottom: 8px;">
-                        🏭 {row.get('industry', 'N/A')} | 📍 {row.get('region', 'N/A')} | 📊 {row.get('phase', 'N/A')}
+                    <h3 style="color: #1e293b; margin: 0 0 10px 0; font-size: 18px;">{row.get('name', 'N/A')}</h3>
+                    <div style="color: #64748b; font-size: 14px; margin-bottom: 10px;">
+                        🏭 {row.get('industry', 'N/A')} &nbsp;|&nbsp; 📍 {row.get('region', 'N/A')} &nbsp;|&nbsp; 📊 {row.get('phase', 'N/A')}
                     </div>
-                    <div style="color: #888; font-size: 13px;">
+                    <div style="color: #94a3b8; font-size: 13px;">
                         {row.get('highlights', '暂无简介')}
                     </div>
                 </div>
@@ -120,14 +149,11 @@ def render():
 
             with col2:
                 st.markdown("**交易类型**")
-                st.write(row.get("phase", "N/A"))
+                st.markdown(f"**{row.get('phase', 'N/A')}**")
+                st.markdown(f"股比：{row.get('share_ratio', 'N/A')}")
 
-            with col3:
-                st.markdown("**股比**")
-                st.write(row.get("share_ratio", "N/A"))
-
-            # 详情按钮
-            col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 2])
+            # 操作按钮
+            col_btn1, col_btn2 = st.columns([1, 1])
             with col_btn1:
                 if st.button(f"📄 详情", key=f"detail_{row['id']}", use_container_width=True):
                     st.session_state.selected_project = row["id"]
